@@ -1,65 +1,62 @@
 /**@type {Object} - import axios */
 const axios = require('axios')
-/** import { chooseRandom, wait } from "./utils"; */
 const { chooseRandom, wait } = require('./utils')
 
 /**
  * Scraper
- * @public
  */
 class Scraper {
   /**
-   * @constructor
-   * @public
+   * Constructor
    * @param {string[]} userAgents - User Agents
    * @param {Object[]} proxies - Proxies
    */
   constructor(userAgents = [], proxies = []) {
-    /**@type {Array} */
+    /**
+     * @private
+     * @type {string[]}
+     */
     this.userAgents = userAgents
-    /**@type {Array} */
+    /**
+     * @private
+     * @type {Object[]}
+     */
     this.proxies = proxies
 
-    /**@type {Object} */
-    this.axios = axios.create({
-      timeout: 1000
-    })
+    /**
+     * @private
+     * @type {Object}
+     */
+    this.axios = axios.create({ timeout: 10000 })
   }
 
   /**
-   * parse data from html
-   * @public
+   * Parse result from HTML
+   * @protected
+   * @abstract
+   * @param {string} html - HTML
+   * @return {Object} Result
    */
-  async parse() {}
+  async parse(html) {}
 
   /**
-   * Scraping URL
-   * @public
+   * Run
    * @param {string} url - URL
-   * @return {Object} - scraped status, data and next URLs if successful, otherwise return an error
+   * @return {Object} - Result
    */
   async run(url) {
     for (let i = 0; i < 2; ++i) {
       const { data: html } = await this.axios.get(url, {
-        headers: {
-          'User-Agent': chooseRandom(this.userAgents)
-        },
+        headers: { 'User-Agent': chooseRandom(this.userAgents) },
         proxy: chooseRandom(this.proxies)
       })
       if (html) {
         const { data, nextUrls } = await this.parse(html)
-        return {
-          success: true,
-          data,
-          nextUrls
-        }
+        return { success: true, data, nextUrls }
       }
       await wait(1000)
     }
-    return {
-      success: false,
-      error: ''
-    }
+    return { success: false, error: '' }
   }
 }
 

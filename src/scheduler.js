@@ -11,22 +11,36 @@ class Scheduler {
    * @param {string} initUrl - Initial URL
    */
   constructor(initUrl) {
-    /** @private
+    /**
+     * @private
      * @type {Array<UrlEntity>}
      */
     this.urlEntityQueue = []
-    /** @private */
+    /**
+     * @private
+     * @type {number}
+     */
     this.scrapers = 0
-    /** @private */
+    /**
+     * @private
+     * @type {number}
+     */
     this.maxScrapers = 8
 
-    /** @private
+    /**
+     * @private
      * @type {Array<DataEntity>}
      */
     this.dataEntityQueue = []
-    /** @private */
+    /**
+     * @private
+     * @type {number}
+     */
     this.dataProcessors = 0
-    /** @private */
+    /**
+     * @private
+     * @type {number}
+     */
     this.maxDataProcessors = 8
 
     /**@type {number} */
@@ -109,9 +123,7 @@ class Scheduler {
     this.scrapers += 1
     const urlEntity = this.dequeueUrlEntity()
     urlEntity.attempts += 1
-    const { success, data, nextUrls } = await urlEntity.scraper.run(
-      urlEntity.url
-    )
+    const { success, data, nextUrls } = await urlEntity.scraper.run(urlEntity.url)
     if (success) {
       this.enqueueDataEntities(new DataEntity(data, urlEntity.dataProcessor))
       this.enqueueUrls(...nextUrls)
